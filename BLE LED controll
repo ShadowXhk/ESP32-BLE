@@ -1,0 +1,32 @@
+import bluetooth
+from ble_uart_peripheral import BLEUART
+from machine import Pin
+led_verte=Pin(23, Pin.OUT)
+led_bleu=Pin(22, Pin.OUT)
+led_jaune=Pin(21, Pin.OUT)
+
+# Create BLE object
+ble = bluetooth.BLE()
+# Open UART session for BLE
+uart = BLEUART(ble)
+# Define ISR for an UART input on BLE connection
+def on_rx():
+    # Read UART string, AppInventor sends raw bytes
+    uart_in = uart.read() # lire le message recu du Smartphone via Bluetooth
+    print("UART IN: ", uart_in.decode()) # display the message received from the Smartphone on the Thonny console
+    if (uart_in.decode().find('v1')==0): 
+       led_verte.value(1) # turn on green led
+    if (uart_in.decode().find('v0')==0): 
+       led_verte.value(0) # turn off green led
+    if (uart_in.decode().find('b1')==0): 
+       led_bleu.value(1) # turn on blue led
+    if (uart_in.decode().find('b0')==0): 
+       led_bleu.value(0) # turn off blue led
+    if (uart_in.decode().find('j1')==0): 
+       led_jaune.value(1) # turn on yellow led
+    if (uart_in.decode().find('j0')==0): 
+       led_jaune.value(0) # turn off yellow led
+
+    # Map ISR to UART read interrupt
+uart.irq(handler=on_rx)
+uart.close()
